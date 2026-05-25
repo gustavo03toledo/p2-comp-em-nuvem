@@ -207,3 +207,26 @@ Se um arquivo falhar, a aplicação registra o erro desse arquivo e continua mig
 - Não colocar connection string, SAS, chave privada ou JSON da Service Account no código.
 - Não expor credenciais no frontend.
 - Revogar e recriar chaves caso alguma credencial seja publicada por engano.
+
+## Erros comuns
+
+### `500 Internal Server Error` ao listar origem ou destino
+
+Esse erro normalmente indica que alguma variável do `.env` está ausente ou ainda está com valor de exemplo.
+
+Verifique principalmente:
+
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL`: deve ser o valor `client_email` do JSON da Service Account.
+- `GOOGLE_PRIVATE_KEY`: deve ser a `private_key` completa do JSON da Service Account.
+- `AZURE_STORAGE_CONNECTION_STRING`: deve ser a connection string real do Azure Blob Storage, não o texto de exemplo.
+- `GOOGLE_DRIVE_FOLDER_ID`: deve ser apenas o ID da pasta ou a URL completa da pasta.
+
+Depois de alterar o `.env`, pare o servidor e rode novamente:
+
+```bash
+npm start
+```
+
+### `404 Not Found` no console do navegador
+
+Se o erro for para `/favicon.ico`, ele é apenas o navegador tentando buscar um ícone da aba. A aplicação já responde essa rota sem quebrar o funcionamento.

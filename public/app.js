@@ -37,7 +37,8 @@ async function requestJson(url, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(data?.message || 'O servidor retornou um erro inesperado.');
+    const detail = data?.error && data.error !== data.message ? ` ${data.error}` : '';
+    throw new Error(`${data?.message || 'O servidor retornou um erro inesperado.'}${detail}`);
   }
 
   return data;
