@@ -21,14 +21,14 @@ async function migrateFiles() {
         downloadedFile.contentType
       );
 
-      console.log('[SUCESSO] Arquivo enviado com sucesso.');
+      console.log(`[SUCESSO] Arquivo enviado com sucesso: ${downloadedFile.fileName}`);
       results.push({
         fileName: downloadedFile.fileName,
         status: 'success',
         message: 'Arquivo migrado com sucesso'
       });
     } catch (error) {
-      console.error(`[ERRO] Falha ao migrar arquivo: ${error.message}`);
+      console.error(`[ERRO] Falha ao migrar arquivo ${targetFileName}: ${error.message}`);
       results.push({
         fileName: targetFileName,
         status: 'error',

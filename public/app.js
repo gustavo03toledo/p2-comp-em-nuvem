@@ -8,6 +8,7 @@ const elements = {
   originTable: document.querySelector('#originTable'),
   destinationTable: document.querySelector('#destinationTable'),
   migrationTable: document.querySelector('#migrationTable'),
+  terminalOutput: document.querySelector('#terminalOutput'),
   buttons: [
     document.querySelector('#btnOrigin'),
     document.querySelector('#btnDestination'),
@@ -18,6 +19,7 @@ const elements = {
 document.querySelector('#btnOrigin').addEventListener('click', loadOriginFiles);
 document.querySelector('#btnDestination').addEventListener('click', loadDestinationFiles);
 document.querySelector('#btnMigrate').addEventListener('click', migrateFiles);
+document.querySelector('#btnClearTerminal').addEventListener('click', clearTerminal);
 
 function setLoading(isLoading, text = 'Carregando...') {
   elements.buttons.forEach((button) => {
@@ -30,6 +32,27 @@ function setLoading(isLoading, text = 'Carregando...') {
 function showMessage(text, type = '') {
   elements.message.textContent = text;
   elements.message.className = `message ${type}`.trim();
+}
+
+function writeTerminal(tag, message) {
+  const timestamp = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(new Date());
+  const line = `[${timestamp}] [${tag}] ${message}`;
+
+  if (elements.terminalOutput.textContent === '[SISTEMA] Aguardando operação.') {
+    elements.terminalOutput.textContent = line;
+  } else {
+    elements.terminalOutput.textContent += `\n${line}`;
+  }
+
+  elements.terminalOutput.scrollTop = elements.terminalOutput.scrollHeight;
+}
+
+function clearTerminal() {
+  elements.terminalOutput.textContent = '[SISTEMA] Aguardando operação.';
 }
 
 async function requestJson(url, options = {}) {
@@ -48,14 +71,17 @@ async function loadOriginFiles() {
   try {
     setLoading(true, 'Buscando origem');
     showMessage('Listando arquivos do Google Drive...');
+    writeTerminal('ORIGEM', 'Buscando arquivos no Google Drive.');
 
     const data = await requestJson('/api/origin');
     const files = data.files || [];
 
     elements.originCount.textContent = files.length;
     renderOriginTable(files);
+    writeTerminal('ORIGEM', `${files.length} arquivo(s) encontrado(s) no Google Drive.`);
     showMessage('Arquivos do Google Drive listados com sucesso.', 'success');
   } catch (error) {
+    writeTerminal('ERRO', `Falha ao listar Google Drive: ${error.message}`);
     showMessage(error.message, 'error');
   } finally {
     setLoading(false);
@@ -66,14 +92,17 @@ async function loadDestinationFiles() {
   try {
     setLoading(true, 'Buscando destino');
     showMessage('Listando arquivos do Azure Blob Storage...');
+    writeTerminal('DESTINO', 'Buscando arquivos no Azure Blob Storage.');
 
     const data = await requestJson('/api/destination');
     const files = data.files || [];
 
     elements.destinationCount.textContent = files.length;
     renderDestinationTable(files);
+    writeTerminal('DESTINO', `${files.length} blob(s) encontrado(s) no Azure Blob Storage.`);
     showMessage('Arquivos do Azure Blob Storage listados com sucesso.', 'success');
   } catch (error) {
+    writeTerminal('ERRO', `Falha ao listar Azure Blob Storage: ${error.message}`);
     showMessage(error.message, 'error');
   } finally {
     setLoading(false);
@@ -83,7 +112,8 @@ async function loadDestinationFiles() {
 async function migrateFiles() {
   try {
     setLoading(true, 'Migrando');
-    showMessage('Migrando arquivos. Acompanhe o progresso tambem no console do servidor...');
+    showMessage('Migrando arquivos. Acompanhe o progresso no terminal da tela e no console do servidor...');
+    writeTerminal('MIGRACAO', 'Iniciando migração dos arquivos.');
 
     const results = await requestJson('/api/migrate', {
       method: 'POST',
@@ -98,15 +128,19 @@ async function migrateFiles() {
     elements.successCount.textContent = successCount;
     elements.errorCount.textContent = errorCount;
     renderMigrationTable(results);
+    renderMigrationLogs(results);
 
     if (errorCount > 0) {
+      writeTerminal('MIGRACAO', `Migração concluída com ${successCount} sucesso(s) e ${errorCount} erro(s).`);
       showMessage('Migração concluida com alguns erros. Veja a tabela de resultado.', 'error');
     } else {
+      writeTerminal('MIGRACAO', `Migração concluída com ${successCount} sucesso(s) e nenhum erro.`);
       showMessage('Migração concluida com sucesso.', 'success');
     }
 
     await refreshDestinationAfterMigration();
   } catch (error) {
+    writeTerminal('ERRO', `Falha geral na migração: ${error.message}`);
     showMessage(error.message, 'error');
   } finally {
     setLoading(false);
@@ -175,6 +209,24 @@ function renderMigrationTable(results) {
       </tr>
     `)
     .join('');
+}
+
+function renderMigrationLogs(results) {
+  if (!results.length) {
+    writeTerminal('MIGRACAO', 'Nenhum arquivo encontrado para migrar.');
+    return;
+  }
+
+  results.forEach((item) => {
+    writeTerminal('DOWNLOAD', `Arquivo processado: ${item.fileName}`);
+    writeTerminal('UPLOAD', `Envio para Azure Blob Storage: ${item.fileName}`);
+
+    if (item.status === 'success') {
+      writeTerminal('SUCESSO', `${item.fileName} migrado com sucesso.`);
+    } else {
+      writeTerminal('ERRO', `Falha ao migrar ${item.fileName}: ${item.message}`);
+    }
+  });
 }
 
 function formatBytes(value) {
