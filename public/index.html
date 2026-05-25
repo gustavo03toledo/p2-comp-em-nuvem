@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Migração Google Drive para Azure Blob Storage</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Computação em Nuvem II</p>
+          <h1>Migração Google Drive para Azure Blob Storage</h1>
+        </div>
+        <span id="statusBadge" class="status-badge">Pronto</span>
+      </header>
+
+      <section class="actions" aria-label="Ações da migração">
+        <button id="btnOrigin" type="button">Listar arquivos do Google Drive</button>
+        <button id="btnDestination" type="button">Listar arquivos do Azure Blob Storage</button>
+        <button id="btnMigrate" class="primary" type="button">Migrar arquivos</button>
+      </section>
+
+      <section id="message" class="message" role="status" aria-live="polite"></section>
+
+      <section class="cards" aria-label="Resumo">
+        <article class="summary-card">
+          <span>Arquivos na origem</span>
+          <strong id="originCount">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Arquivos no destino</span>
+          <strong id="destinationCount">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Migrados com sucesso</span>
+          <strong id="successCount">0</strong>
+        </article>
+        <article class="summary-card">
+          <span>Erros</span>
+          <strong id="errorCount">0</strong>
+        </article>
+      </section>
+
+      <section class="data-grid">
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Origem - Google Drive</h2>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Tipo</th>
+                  <th>Tamanho</th>
+                  <th>Destino</th>
+                </tr>
+              </thead>
+              <tbody id="originTable">
+                <tr>
+                  <td colspan="4">Nenhum arquivo listado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Destino - Azure Blob Storage</h2>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Tipo</th>
+                  <th>Tamanho</th>
+                  <th>Última alteração</th>
+                </tr>
+              </thead>
+              <tbody id="destinationTable">
+                <tr>
+                  <td colspan="4">Nenhum blob listado.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel migration-panel">
+        <div class="panel-header">
+          <h2>Resultado da migração</h2>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Arquivo</th>
+                <th>Status</th>
+                <th>Mensagem</th>
+              </tr>
+            </thead>
+            <tbody id="migrationTable">
+              <tr>
+                <td colspan="3">Nenhuma migração executada.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
