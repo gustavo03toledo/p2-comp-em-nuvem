@@ -38,8 +38,19 @@ app.use((error, req, res, next) => {
   res.status(500).json(responseBody);
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Servidor iniciado em http://localhost:${port}`);
+});
+
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`[ERRO] A porta ${port} ja esta em uso.`);
+    console.error('Feche o outro servidor Node.js ou configure outra porta no .env, por exemplo: PORT=3001.');
+    process.exit(1);
+  }
+
+  console.error('[ERRO] Falha ao iniciar o servidor:', error.message);
+  process.exit(1);
 });
 
 module.exports = app;

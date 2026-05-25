@@ -5,6 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "start:3001": "node -e \"process.env.PORT=3001; require('./src/server')\"",
     "dev": "node --watch src/server.js"
   },
   "keywords": [

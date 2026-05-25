@@ -100,6 +100,31 @@ Para desenvolvimento com reinício automático do Node.js:
 npm run dev
 ```
 
+Se a porta `3000` estiver ocupada, rode temporariamente na porta `3001`:
+
+```bash
+npm run start:3001
+```
+
+No PowerShell, também é possível definir outra porta manualmente:
+
+```powershell
+$env:PORT=3001
+npm start
+```
+
+Para descobrir qual processo está usando a porta `3000` no Windows:
+
+```powershell
+Get-NetTCPConnection -LocalPort 3000 -State Listen
+```
+
+Depois encerre o processo usando o valor da coluna `OwningProcess`:
+
+```powershell
+Stop-Process -Id NUMERO_DO_PROCESSO -Force
+```
+
 ## Rotas
 
 ### GET `/health`
