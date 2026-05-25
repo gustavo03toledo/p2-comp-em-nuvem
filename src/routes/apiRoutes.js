@@ -38,4 +38,13 @@ router.post('/migrate', async (req, res, next) => {
   }
 });
 
+router.delete('/destination', async (req, res, next) => {
+  try {
+    const results = await azureBlobService.deleteAllBlobs();
+    res.json(results);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

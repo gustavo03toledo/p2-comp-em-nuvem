@@ -164,6 +164,22 @@ Resposta:
 ]
 ```
 
+### DELETE `/api/destination`
+
+Exclui todos os blobs do contêiner configurado em `AZURE_CONTAINER_NAME`. Use essa rota pelo botão `Excluir blobs do Azure` quando quiser limpar o destino e repetir a migração.
+
+Resposta:
+
+```json
+[
+  {
+    "fileName": "arquivo.pdf",
+    "status": "success",
+    "message": "Blob excluido com sucesso"
+  }
+]
+```
+
 ## Logs da migração
 
 Durante a migração, o console do servidor mostra mensagens como:

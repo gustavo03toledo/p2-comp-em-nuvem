@@ -12,13 +12,15 @@ const elements = {
   buttons: [
     document.querySelector('#btnOrigin'),
     document.querySelector('#btnDestination'),
-    document.querySelector('#btnMigrate')
+    document.querySelector('#btnMigrate'),
+    document.querySelector('#btnClearDestination')
   ]
 };
 
 document.querySelector('#btnOrigin').addEventListener('click', loadOriginFiles);
 document.querySelector('#btnDestination').addEventListener('click', loadDestinationFiles);
 document.querySelector('#btnMigrate').addEventListener('click', migrateFiles);
+document.querySelector('#btnClearDestination').addEventListener('click', clearDestinationBlobs);
 document.querySelector('#btnClearTerminal').addEventListener('click', clearTerminal);
 
 function setLoading(isLoading, text = 'Carregando...') {
@@ -147,6 +149,49 @@ async function migrateFiles() {
   }
 }
 
+async function clearDestinationBlobs() {
+  const confirmed = window.confirm('Excluir todos os blobs do contêiner Azure? Essa ação não pode ser desfeita.');
+
+  if (!confirmed) {
+    writeTerminal('DESTINO', 'Exclusão dos blobs cancelada pelo usuário.');
+    return;
+  }
+
+  try {
+    setLoading(true, 'Excluindo blobs');
+    showMessage('Excluindo blobs do Azure Blob Storage...');
+    writeTerminal('DELETE', 'Iniciando exclusão dos blobs no Azure Blob Storage.');
+
+    const results = await requestJson('/api/destination', {
+      method: 'DELETE'
+    });
+
+    const successCount = results.filter((item) => item.status === 'success').length;
+    const errorCount = results.filter((item) => item.status === 'error').length;
+
+    if (!results.length) {
+      writeTerminal('DELETE', 'Nenhum blob encontrado para excluir.');
+      showMessage('Nenhum blob encontrado para excluir.', 'success');
+    } else {
+      renderDeleteLogs(results);
+      writeTerminal('DELETE', `Exclusão concluída com ${successCount} sucesso(s) e ${errorCount} erro(s).`);
+      showMessage(
+        errorCount > 0
+          ? 'Exclusão concluída com alguns erros. Veja o terminal.'
+          : 'Blobs excluídos com sucesso.',
+        errorCount > 0 ? 'error' : 'success'
+      );
+    }
+
+    await refreshDestinationAfterMigration();
+  } catch (error) {
+    writeTerminal('ERRO', `Falha ao excluir blobs: ${error.message}`);
+    showMessage(error.message, 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function refreshDestinationAfterMigration() {
   const data = await requestJson('/api/destination');
   const files = data.files || [];
@@ -225,6 +270,16 @@ function renderMigrationLogs(results) {
       writeTerminal('SUCESSO', `${item.fileName} migrado com sucesso.`);
     } else {
       writeTerminal('ERRO', `Falha ao migrar ${item.fileName}: ${item.message}`);
+    }
+  });
+}
+
+function renderDeleteLogs(results) {
+  results.forEach((item) => {
+    if (item.status === 'success') {
+      writeTerminal('SUCESSO', `${item.fileName} excluído do Azure Blob Storage.`);
+    } else {
+      writeTerminal('ERRO', `Falha ao excluir ${item.fileName}: ${item.message}`);
     }
   });
 }

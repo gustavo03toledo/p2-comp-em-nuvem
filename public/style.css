@@ -114,6 +114,17 @@ button.primary {
   font-weight: 700;
 }
 
+.danger-button {
+  border-color: rgba(255, 107, 107, 0.7);
+  color: #ffdada;
+  background: rgba(255, 107, 107, 0.14);
+}
+
+.danger-button:hover {
+  border-color: var(--danger);
+  background: rgba(255, 107, 107, 0.22);
+}
+
 .secondary-button {
   min-height: 34px;
   padding: 7px 12px;

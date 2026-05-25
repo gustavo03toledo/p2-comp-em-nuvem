@@ -34,7 +34,35 @@ async function uploadFile(fileName, data, contentType) {
   });
 }
 
+async function deleteAllBlobs() {
+  const containerClient = await getReadyContainerClient();
+  const results = [];
+
+  for await (const blob of containerClient.listBlobsFlat()) {
+    try {
+      console.log(`[DELETE] Excluindo blob: ${blob.name}`);
+      await containerClient.deleteBlob(blob.name);
+      console.log(`[SUCESSO] Blob excluido com sucesso: ${blob.name}`);
+      results.push({
+        fileName: blob.name,
+        status: 'success',
+        message: 'Blob excluido com sucesso'
+      });
+    } catch (error) {
+      console.error(`[ERRO] Falha ao excluir blob ${blob.name}: ${error.message}`);
+      results.push({
+        fileName: blob.name,
+        status: 'error',
+        message: error.message
+      });
+    }
+  }
+
+  return results;
+}
+
 module.exports = {
   listBlobs,
-  uploadFile
+  uploadFile,
+  deleteAllBlobs
 };
